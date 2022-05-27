@@ -29,8 +29,8 @@ AND star_rating > 4;
 --Question #5
 SELECT COUNT(*)
 FROM data_analyst_jobs
-WHERE review_count > 500 AND review_count < 1000;
---150
+WHERE review_count BETWEEN 500 AND 1000;
+--151
 
 --Question #6
 SELECT location AS state, AVG(star_rating) AS avg_rating
@@ -38,12 +38,18 @@ FROM data_analyst_jobs
 GROUP BY state
 ORDER BY AVG(star_rating) DESC;
 --NE, 4.1999998...
--- Below just removes the states with a null avg star rating
-SELECT location AS state, AVG(star_rating) AS avg_rating
+-- Below just removes the states with a null avg star rating and rounds the values to 2 places
+SELECT location AS state, ROUND(AVG(star_rating), 2) AS avg_rating
 FROM data_analyst_jobs
 GROUP BY state
 HAVING AVG(star_rating) IS NOT NULL
 ORDER BY AVG(star_rating) DESC;
+--Keeping NULLS in but moving them to the end
+SELECT location AS state, ROUND(AVG(star_rating), 2) AS avg_rating
+FROM data_analyst_jobs
+GROUP BY state
+ORDER BY AVG(star_rating) DESC NULLS LAST;
+-- adding NULLS LAST does this
 
 --Question #7
 SELECT DISTINCT title
@@ -60,7 +66,7 @@ WHERE location = 'CA';
 --230
 
 --Question #9
-SELECT company, AVG(star_rating) AS overall_rating
+SELECT company, ROUND(AVG(star_rating), 3) AS overall_rating
 FROM data_analyst_jobs
 GROUP BY company
 HAVING SUM(review_count) > 5000;
@@ -85,12 +91,13 @@ WHERE review_count > 5000;
 --Question #10
 SELECT company, AVG(star_rating) AS overall_rating
 FROM data_analyst_jobs
+WHERE company IS NOT NULL
 GROUP BY company
 HAVING SUM(review_count) > 5000
 ORDER BY overall_rating DESC;
 --Google 4.3...
 --Below takes into account the fact that data was pre-aggregated, so no need to sum reviews
-SELECT company, AVG(star_rating) AS overall_rating, AVG(review_count)
+SELECT company, AVG(star_rating) AS overall_rating, AVG(review_count) AS rvw_count
 FROM data_analyst_jobs
 WHERE review_count > 5000
 GROUP BY company
@@ -146,13 +153,15 @@ AND title NOT ILIKE '%Analytics%';
 --4, Tableau
 
 --Bonus
-SELECT domain, COUNT(*) AS hard_to_fill, AVG(days_since_posting) AS avg_days_posted, MIN(days_since_posting) AS min_days, MAX(days_since_posting) AS max_days
+SELECT domain, COUNT(*) AS hard_to_fill, AVG(days_since_posting) AS avg_days_posted, 
+		MIN(days_since_posting) AS min_days, MAX(days_since_posting) AS max_days
 FROM data_analyst_jobs
 WHERE days_since_posting > 21
 AND skill ILIKE '%sql%'
 AND domain IS NOT NULL
 GROUP BY domain
-ORDER BY hard_to_fill DESC;
+ORDER BY hard_to_fill DESC
+LIMIT 4;
 /* Internet and Software- 62 jobs
 Banks and Financial Services- 61 jobs
 Consulting and Business Services- 57
